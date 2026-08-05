@@ -1,24 +1,106 @@
 /* ROL: Glendi Campos
    -------------------------------------------------------------------
    Estilos globales / overrides sobre Bootstrap. Mantener aquí solo lo
-   que no tenga sentido como clase utilitaria de Bootstrap (por ejemplo,
-   ajustes finos de tipografía, transiciones globales, dark mode, etc.).
+   que no tenga sentido como clase utilitaria de Bootstrap (transiciones
+   globales, variables de marca, utilidades compartidas entre
+   componentes, dark mode, etc.). */
 
-   TODO (Glendi):
-   - Definir paleta de marca (variables CSS) si el equipo quiere un
-     look propio en vez del Bootstrap por defecto.
-   - Transiciones suaves para cards/modales.
-   - Revisar accesibilidad de contraste en badges de oferta. */
+:root {
+  /* Color de acento para todo lo relacionado a ofertas/descuentos.
+     Se consume desde OfertaBadge.vue y RibbonOferta.vue via var(). */
+  --oferta-color: #dc3545;
+  --oferta-precio-color: #146c43;
+  --oferta-precio-color-dark: #75d89b;
+}
 
 body {
   background-color: #f8f9fa;
 }
 
-.card {
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #16171d;
+    color: #e9ecef;
+  }
+}
+
+/* --- Utilidades compartidas ------------------------------------------ */
+
+/* Trunca texto a 2 líneas con "…", usado en la descripción de las cards
+   para que todas queden con la misma altura sin importar el largo del
+   texto (ver ProductoCard.vue). */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Transición de entrada suave para estados de Loader/ErrorMessage, así
+   la interfaz no "salta" al pasar de cargando -> error -> contenido. */
+.fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- Cards del catálogo ------------------------------------------------ */
+
+.producto-card {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.card:hover {
+.producto-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.producto-imagen {
+  height: 180px;
+  object-fit: cover;
+  background-color: #f1f1f1;
+}
+
+/* --- Panel de filtros (categorías + búsqueda + oferta) ------------------ */
+
+.filtros-panel {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .filtros-panel {
+    background-color: #1f2028;
+  }
+}
+
+/* --- Modales (crear/editar/detalle/confirmar) -------------------------- */
+
+.modal.d-block {
+  animation: fade-in 0.15s ease-out;
+}
+
+.modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+/* --- Accesibilidad ------------------------------------------------------ */
+
+/* Bootstrap ya trae focus-visible razonable, pero reforzamos el
+   contraste del anillo de foco para botones/enlaces sobre fondos oscuros
+   (navbar) donde el azul por defecto se pierde. */
+.navbar a:focus-visible,
+.navbar button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }

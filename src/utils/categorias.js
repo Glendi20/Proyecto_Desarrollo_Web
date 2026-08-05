@@ -16,6 +16,17 @@
 //    ordenamos alfabéticamente para que el menú sea predecible.
 //
 // Devuelve: [{ id: 1, nombre: 'Electrónica' }, { id: 2, nombre: 'Hogar' }, ...]
+//
+// NOTA para Esaú (hallazgo, no un cambio aplicado): al probar contra el
+// BackService real noté que, al ser una base de datos de pruebas
+// compartida entre equipos, un mismo categoriaId puede venir con varios
+// categoriaNombre distintos (ej. categoriaId 1 aparece como "Electrónica"
+// ~35 veces, pero también como "comida", "juguetes", vacío, etc.). Con
+// "tomar el primero que aparece" el menú a veces muestra un nombre poco
+// representativo. Antes de la exposición, vale la pena que decidas (y
+// puedas explicar) si prefieres quedarte con el primero o cambiar a "el
+// nombre más frecuente" para ese id — lo dejo como decisión tuya ya que
+// es la pieza que te toca defender en la Diapositiva 2.
 export function extraerCategorias(productos = []) {
   const mapaCategorias = new Map()
 

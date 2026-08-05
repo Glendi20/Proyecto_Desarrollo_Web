@@ -58,29 +58,33 @@ async function confirmarEliminacion(id) {
 
 <template>
   <div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
       <h1 class="h3 mb-0">Catálogo de productos</h1>
       <button class="btn btn-success" @click="modalCrearVisible = true">
-        + Nuevo producto
+        <i class="bi bi-plus-lg me-1"></i>Nuevo producto
       </button>
     </div>
 
-    <!-- Menú dinámico de categorías (ROL: Esaú Mendoza) -->
-    <div class="mb-3">
-      <CategoriaMenu
-        :categorias="store.categorias"
-        :categoria-seleccionada="criterios.categoriaId"
-        @seleccionar="(id) => (criterios.categoriaId = id)"
-      />
-    </div>
-
-    <!-- Búsqueda + filtro de oferta (ROL: Maryori Fajardo) -->
-    <div class="row g-2 mb-4">
-      <div class="col-12 col-md-6">
-        <SearchBar v-model="criterios.nombre" />
+    <!-- Barra de filtros: agrupa categorías (Esaú) + búsqueda/oferta (Maryori)
+         en un mismo panel visual para que se lea como una sola unidad. -->
+    <div class="filtros-panel mb-4">
+      <!-- Menú dinámico de categorías (ROL: Esaú Mendoza) -->
+      <div class="mb-3">
+        <CategoriaMenu
+          :categorias="store.categorias"
+          :categoria-seleccionada="criterios.categoriaId"
+          @seleccionar="(id) => (criterios.categoriaId = id)"
+        />
       </div>
-      <div class="col-12 col-md-6 d-flex align-items-center">
-        <FiltroOferta v-model="criterios.soloOferta" />
+
+      <!-- Búsqueda + filtro de oferta (ROL: Maryori Fajardo) -->
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <SearchBar v-model="criterios.nombre" />
+        </div>
+        <div class="col-12 col-md-6 d-flex align-items-center">
+          <FiltroOferta v-model="criterios.soloOferta" />
+        </div>
       </div>
     </div>
 
@@ -104,7 +108,7 @@ async function confirmarEliminacion(id) {
     />
 
     <!-- Modal crear -->
-    <div v-if="modalCrearVisible" class="modal d-block" style="background: rgba(0,0,0,0.5)">
+    <div v-if="modalCrearVisible" class="modal d-block modal-overlay">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content p-3">
           <ProductoFormCreate
@@ -116,7 +120,7 @@ async function confirmarEliminacion(id) {
     </div>
 
     <!-- Modal editar -->
-    <div v-if="productoEnEdicion" class="modal d-block" style="background: rgba(0,0,0,0.5)">
+    <div v-if="productoEnEdicion" class="modal d-block modal-overlay">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content p-3">
           <ProductoFormEdit

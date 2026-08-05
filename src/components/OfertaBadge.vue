@@ -2,34 +2,81 @@
 // ROL: Glendi Campos
 // -----------------------------------------------------------------------
 // Indicador visual de oferta: etiqueta de descuento + comparación de
-// precio original vs. precio de oferta. Se usa dentro de ProductoCard.vue
-// y en el detalle (ProductoDetalleModal.vue).
-//
-// TODO (Glendi):
-// - Calcular y mostrar el % de descuento.
-// - Revisar contraste/accesibilidad del color en modo claro/oscuro.
-// - Animación/transición sutil al aparecer la etiqueta.
+// precio original vs. precio de oferta. Se usa en ProductoCard.vue,
+// ProductoDetalleModal.vue y ProductoDetalleView.vue.
+import { computed } from 'vue'
+import { calcularDescuento, formatearPrecio } from '@/utils/precio'
+
 const props = defineProps({
   precio: { type: Number, required: true },
   precioOferta: { type: Number, default: null },
   enOferta: { type: Boolean, default: false },
 })
 
-const porcentajeDescuento = () => {
-  if (!props.enOferta || !props.precioOferta) return 0
-  return Math.round(100 - (props.precioOferta / props.precio) * 100)
-}
+const mostrarOferta = computed(() => props.enOferta && !!props.precioOferta)
+const descuento = computed(() => calcularDescuento(props.precio, props.precioOferta))
 </script>
 
 <template>
-  <div v-if="enOferta && precioOferta" class="d-flex align-items-center gap-2">
-    <span class="badge bg-danger">-{{ porcentajeDescuento() }}%</span>
-    <span class="text-decoration-line-through text-muted small">
-      ${{ precio.toFixed(2) }}
+  <div v-if="mostrarOferta" class="oferta-precio" role="text"
+    :aria-label="`Precio con ${descuento}% de descuento: antes ${formatearPrecio(precio)}, ahora ${formatearPrecio(precioOferta)}`">
+    <span class="badge oferta-badge">
+      <i class="bi bi-tag-fill me-1"></i>-{{ descuento }}%
     </span>
-    <span class="fw-bold text-success">${{ precioOferta.toFixed(2) }}</span>
+    <span class="precio-original">{{ formatearPrecio(precio) }}</span>
+    <span class="precio-oferta">{{ formatearPrecio(precioOferta) }}</span>
   </div>
   <div v-else>
-    <span class="fw-bold">${{ precio.toFixed(2) }}</span>
+    <span class="precio-normal">{{ formatearPrecio(precio) }}</span>
   </div>
 </template>
+
+<style scoped>
+.oferta-precio {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  animation: aparecer 0.2s ease-out;
+}
+
+.oferta-badge {
+  background-color: var(--oferta-color, #dc3545);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.precio-original {
+  text-decoration: line-through;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.85em;
+}
+
+.precio-oferta {
+  font-weight: 700;
+  color: var(--oferta-precio-color, #146c43);
+  font-size: 1.05em;
+}
+
+.precio-normal {
+  font-weight: 700;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .precio-oferta {
+    color: var(--oferta-precio-color-dark, #75d89b);
+  }
+}
+</style>
