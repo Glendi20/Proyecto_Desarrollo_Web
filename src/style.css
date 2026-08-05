@@ -1,0 +1,24 @@
+/* ROL: Glendi Campos
+   -------------------------------------------------------------------
+   Estilos globales / overrides sobre Bootstrap. Mantener aquí solo lo
+   que no tenga sentido como clase utilitaria de Bootstrap (por ejemplo,
+   ajustes finos de tipografía, transiciones globales, dark mode, etc.).
+
+   TODO (Glendi):
+   - Definir paleta de marca (variables CSS) si el equipo quiere un
+     look propio en vez del Bootstrap por defecto.
+   - Transiciones suaves para cards/modales.
+   - Revisar accesibilidad de contraste en badges de oferta. */
+
+body {
+  background-color: #f8f9fa;
+}
+
+.card {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
