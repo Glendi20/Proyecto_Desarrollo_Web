@@ -25,7 +25,7 @@ onMounted(() => {
 // --- Filtros combinados (ROL: Maryori Fajardo) ---
 const criterios = ref({
   nombre: '',
-  categoriaId: null,
+  categoriaClave: null,
   soloOferta: false,
 })
 
@@ -107,7 +107,11 @@ async function confirmarEliminacion(id) {
     >
       <h1 class="h3 mb-0">Catálogo de productos</h1>
 
-      <button class="btn btn-success" @click="modalCrearVisible = true">
+      <button
+        type="button"
+        class="btn btn-success"
+        @click="modalCrearVisible = true"
+      >
         <i class="bi bi-plus-lg me-1"></i>
         Nuevo producto
       </button>
@@ -135,8 +139,10 @@ async function confirmarEliminacion(id) {
       <div class="mb-3">
         <CategoriaMenu
           :categorias="store.categorias"
-          :categoria-seleccionada="criterios.categoriaId"
-          @seleccionar="(id) => (criterios.categoriaId = id)"
+          :categoria-seleccionada="criterios.categoriaClave"
+          @seleccionar="
+            (clave) => (criterios.categoriaClave = clave)
+          "
         />
       </div>
 

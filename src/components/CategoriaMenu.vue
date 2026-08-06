@@ -1,22 +1,35 @@
 <script setup>
 // ROL: Esaú Mendoza
 // -----------------------------------------------------------------------
-// Menú dinámico de categorías. La lista de `categorias` viene del getter
-// `categorias` del store (useProductosStore), que llama a
-// extraerCategorias() en src/utils/categorias.js — ESA es la función que
-// debes poder explicar en la Diapositiva 2 (algoritmo DISTINCT).
+// Menú dinámico construido a partir de las categorías obtenidas mediante
+// DISTINCT por la combinación categoriaId + categoriaNombre.
 //
-// Este componente solo se encarga de la UI: pintar el menú y emitir el
-// id de categoría seleccionado hacia HomeView (que lo pasa a Maryori en
-// aplicarFiltros()).
+// Cada categoría contiene:
+// {
+//   id: number,
+//   nombre: string,
+//   nombreVisible: string,
+//   clave: string
+// }
 //
-// TODO (Esaú):
-// - Resaltar visualmente la categoría activa (categoriaSeleccionada).
-// - Opción "Todas" para limpiar el filtro de categoría.
-// - Si el catálogo es grande, considerar convertir esto en dropdown en mobile.
+// La clave permite diferenciar categorías que comparten el mismo ID:
+// 5::cpu
+// 5::entretenimiento
+//
+// nombreVisible permite distinguir nombres repetidos asociados a IDs
+// diferentes:
+// Electrónica (ID 1)
+// Electrónica (ID 3)
+
 defineProps({
-  categorias: { type: Array, required: true }, // [{ id, nombre }]
-  categoriaSeleccionada: { type: [Number, null], default: null },
+  categorias: {
+    type: Array,
+    required: true,
+  },
+  categoriaSeleccionada: {
+    type: String,
+    default: null,
+  },
 })
 
 const emit = defineEmits(['seleccionar'])
@@ -25,20 +38,31 @@ const emit = defineEmits(['seleccionar'])
 <template>
   <div class="d-flex flex-wrap gap-2">
     <button
+      type="button"
       class="btn btn-sm"
-      :class="categoriaSeleccionada === null ? 'btn-primary' : 'btn-outline-primary'"
+      :class="
+        categoriaSeleccionada === null
+          ? 'btn-primary'
+          : 'btn-outline-primary'
+      "
       @click="emit('seleccionar', null)"
     >
       Todas
     </button>
+
     <button
       v-for="categoria in categorias"
-      :key="categoria.id"
+      :key="categoria.clave"
+      type="button"
       class="btn btn-sm"
-      :class="categoriaSeleccionada === categoria.id ? 'btn-primary' : 'btn-outline-primary'"
-      @click="emit('seleccionar', categoria.id)"
+      :class="
+        categoriaSeleccionada === categoria.clave
+          ? 'btn-primary'
+          : 'btn-outline-primary'
+      "
+      @click="emit('seleccionar', categoria.clave)"
     >
-      {{ categoria.nombre }}
+      {{ categoria.nombreVisible ?? categoria.nombre }}
     </button>
   </div>
 </template>
