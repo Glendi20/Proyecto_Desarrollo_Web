@@ -1,8 +1,6 @@
 <script setup>
 // Vista principal: orquesta store + filtros + listado + modales.
 // Cada rol conecta aquí su pieza (marcado con comentarios "ROL: ...").
-// Si tu tarea es un componente aislado, probablemente NO necesitas tocar
-// este archivo salvo para enganchar tu componente al flujo general.
 import { computed, onMounted, ref } from 'vue'
 import { useProductosStore } from '@/stores/productos'
 import { aplicarFiltros } from '@/utils/filtros'
@@ -25,15 +23,24 @@ onMounted(() => {
 })
 
 // --- Filtros combinados (ROL: Maryori Fajardo) ---
-const criterios = ref({ nombre: '', categoriaId: null, soloOferta: false })
-const productosFiltrados = computed(() => aplicarFiltros(store.productos, criterios.value))
+const criterios = ref({
+  nombre: '',
+  categoriaId: null,
+  soloOferta: false,
+})
+
+const productosFiltrados = computed(() =>
+  aplicarFiltros(store.productos, criterios.value),
+)
 
 // --- Detalle (ROL: Anthony Ríos) ---
 const modalDetalleVisible = ref(false)
+
 function abrirDetalle(id) {
   modalDetalleVisible.value = true
   store.fetchProductoPorId(id)
 }
+
 function cerrarDetalle() {
   modalDetalleVisible.value = false
   store.productoActual = null
@@ -44,29 +51,85 @@ const modalCrearVisible = ref(false)
 
 // --- Editar (ROL: Eddy Castro) ---
 const productoEnEdicion = ref(null)
+
 function abrirEdicion(producto) {
   productoEnEdicion.value = producto
 }
 
 // --- Eliminar (ROL: Esaú Mendoza) ---
 const productoAEliminar = ref(null)
-async function confirmarEliminacion(id) {
-  await store.eliminar(id)
+const eliminando = ref(false)
+const errorEliminacion = ref('')
+const mensajeEliminacion = ref('')
+
+function abrirEliminacion(producto) {
+  productoAEliminar.value = producto
+  errorEliminacion.value = ''
+  mensajeEliminacion.value = ''
+}
+
+function cancelarEliminacion() {
+  // Evita cerrar el modal mientras la solicitud DELETE está en proceso.
+  if (eliminando.value) return
+
   productoAEliminar.value = null
+  errorEliminacion.value = ''
+}
+
+async function confirmarEliminacion(id) {
+  // Evita solicitudes sin ID o múltiples solicitudes por doble clic.
+  if (id == null || eliminando.value) return
+
+  eliminando.value = true
+  errorEliminacion.value = ''
+  mensajeEliminacion.value = ''
+
+  try {
+    await store.eliminar(id)
+
+    mensajeEliminacion.value = 'Producto eliminado correctamente.'
+    productoAEliminar.value = null
+  } catch (error) {
+    errorEliminacion.value =
+      error.response?.data?.message ||
+      error.message ||
+      'No fue posible eliminar el producto. Intenta nuevamente.'
+  } finally {
+    eliminando.value = false
+  }
 }
 </script>
 
 <template>
   <div class="container py-4">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+    <div
+      class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3"
+    >
       <h1 class="h3 mb-0">Catálogo de productos</h1>
+
       <button class="btn btn-success" @click="modalCrearVisible = true">
-        <i class="bi bi-plus-lg me-1"></i>Nuevo producto
+        <i class="bi bi-plus-lg me-1"></i>
+        Nuevo producto
       </button>
     </div>
 
-    <!-- Barra de filtros: agrupa categorías (Esaú) + búsqueda/oferta (Maryori)
-         en un mismo panel visual para que se lea como una sola unidad. -->
+    <!-- Mensaje de éxito después de eliminar -->
+    <div
+      v-if="mensajeEliminacion"
+      class="alert alert-success alert-dismissible fade show"
+      role="alert"
+    >
+      {{ mensajeEliminacion }}
+
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Cerrar"
+        @click="mensajeEliminacion = ''"
+      ></button>
+    </div>
+
+    <!-- Barra de filtros -->
     <div class="filtros-panel mb-4">
       <!-- Menú dinámico de categorías (ROL: Esaú Mendoza) -->
       <div class="mb-3">
@@ -82,20 +145,28 @@ async function confirmarEliminacion(id) {
         <div class="col-12 col-md-6">
           <SearchBar v-model="criterios.nombre" />
         </div>
+
         <div class="col-12 col-md-6 d-flex align-items-center">
           <FiltroOferta v-model="criterios.soloOferta" />
         </div>
       </div>
     </div>
 
+    <!-- Estado general del catálogo -->
     <Loader v-if="store.loading" />
-    <ErrorMessage v-else-if="store.error" :mensaje="store.error" @reintentar="store.fetchProductos" />
+
+    <ErrorMessage
+      v-else-if="store.error"
+      :mensaje="store.error"
+      @reintentar="store.fetchProductos"
+    />
+
     <ProductoList
       v-else
       :productos="productosFiltrados"
       @ver-detalle="abrirDetalle"
       @editar="abrirEdicion"
-      @eliminar="(producto) => (productoAEliminar = producto)"
+      @eliminar="abrirEliminacion"
     />
 
     <!-- Modal detalle -->
@@ -108,7 +179,10 @@ async function confirmarEliminacion(id) {
     />
 
     <!-- Modal crear -->
-    <div v-if="modalCrearVisible" class="modal d-block modal-overlay">
+    <div
+      v-if="modalCrearVisible"
+      class="modal d-block modal-overlay"
+    >
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content p-3">
           <ProductoFormCreate
@@ -120,7 +194,10 @@ async function confirmarEliminacion(id) {
     </div>
 
     <!-- Modal editar -->
-    <div v-if="productoEnEdicion" class="modal d-block modal-overlay">
+    <div
+      v-if="productoEnEdicion"
+      class="modal d-block modal-overlay"
+    >
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content p-3">
           <ProductoFormEdit
@@ -136,8 +213,10 @@ async function confirmarEliminacion(id) {
     <ConfirmDeleteModal
       :visible="!!productoAEliminar"
       :producto="productoAEliminar"
+      :loading="eliminando"
+      :error="errorEliminacion"
       @confirmar="confirmarEliminacion"
-      @cancelar="productoAEliminar = null"
+      @cancelar="cancelarEliminacion"
     />
   </div>
 </template>
