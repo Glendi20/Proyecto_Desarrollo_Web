@@ -61,4 +61,6 @@ function validar() {
 
   return Object.values(errores).every((mensaje) => !mensaje)
 }
+
+  return { form, errores, validar }
 }

@@ -233,6 +233,7 @@ async function onSubmit() {
     {{ errores.categoriaNombre }}
   </div>
 </div>
+        </div>
 
         <div class="form-check form-switch">
           <input
