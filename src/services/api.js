@@ -20,9 +20,16 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status ?? null
     const message = error.response?.data?.message
+      || error.response?.data?.title
       || (error.code === 'ECONNABORTED'
         ? 'La solicitud tardó demasiado. Intenta de nuevo.'
-        : 'No se pudo conectar con el servidor. Verifica tu conexión.')
+        : status === 404
+          ? 'No se encontró el producto solicitado.'
+          : status >= 500
+            ? 'El servidor presentó un problema. Intenta de nuevo más tarde.'
+            : status
+              ? 'No fue posible completar la solicitud. Intenta de nuevo.'
+              : 'No se pudo conectar con el servidor. Verifica tu conexión.')
 
     return Promise.reject({ status, message, original: error })
   }

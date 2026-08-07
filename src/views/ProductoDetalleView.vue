@@ -22,8 +22,12 @@ onMounted(() => {
   <div class="container py-4">
     <button class="btn btn-link mb-3 ps-0" @click="router.push('/')">← Volver al catálogo</button>
 
-    <Loader v-if="store.loading" />
-    <ErrorMessage v-else-if="store.error" :mensaje="store.error" />
+    <Loader v-if="store.loadingDetalle" mensaje="Cargando detalle del producto..." />
+    <ErrorMessage
+      v-else-if="store.errorDetalle"
+      :mensaje="store.errorDetalle"
+      @reintentar="store.fetchProductoPorId(Number(props.id))"
+    />
     <div v-else-if="store.productoActual" class="row">
       <div class="col-md-5">
         <img :src="store.productoActual.imagen" :alt="store.productoActual.nombre" class="img-fluid rounded" />

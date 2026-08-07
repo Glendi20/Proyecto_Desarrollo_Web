@@ -35,15 +35,19 @@ const productosFiltrados = computed(() =>
 
 // --- Detalle (ROL: Anthony Ríos) ---
 const modalDetalleVisible = ref(false)
+const productoIdDetalle = ref(null)
 
 function abrirDetalle(id) {
+  productoIdDetalle.value = id
   modalDetalleVisible.value = true
   store.fetchProductoPorId(id)
 }
 
 function cerrarDetalle() {
   modalDetalleVisible.value = false
+  productoIdDetalle.value = null
   store.productoActual = null
+  store.errorDetalle = null
 }
 
 // --- Crear (ROL: César Chamo) ---
@@ -179,8 +183,10 @@ async function confirmarEliminacion(id) {
     <ProductoDetalleModal
       :visible="modalDetalleVisible"
       :producto="store.productoActual"
-      :loading="store.loading"
-      :error="store.error"
+      :producto-id="productoIdDetalle"
+      :loading="store.loadingDetalle"
+      :error="store.errorDetalle"
+      @reintentar="store.fetchProductoPorId"
       @cerrar="cerrarDetalle"
     />
 

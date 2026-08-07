@@ -20,6 +20,8 @@ export const useProductosStore = defineStore('productos', {
     productoActual: null, // detalle cargado por GET /producto/{id}
     loading: false,
     error: null,          // string legible para mostrar en ErrorMessage.vue
+    loadingDetalle: false,
+    errorDetalle: null,
   }),
 
   getters: {
@@ -42,14 +44,15 @@ export const useProductosStore = defineStore('productos', {
     },
 
     async fetchProductoPorId(id) {
-      this.loading = true
-      this.error = null
+      this.loadingDetalle = true
+      this.errorDetalle = null
+      this.productoActual = null
       try {
         this.productoActual = await getProductoPorId(id)
       } catch (err) {
-        this.error = err.message || 'Error al cargar el producto.'
+        this.errorDetalle = err.message || 'Error al cargar el producto.'
       } finally {
-        this.loading = false
+        this.loadingDetalle = false
       }
     },
 

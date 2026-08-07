@@ -12,28 +12,40 @@
 // - Mostrar Loader.vue mientras `loading` es true.
 // - Mostrar ErrorMessage.vue si `error` no es null.
 import OfertaBadge from '@/components/OfertaBadge.vue'
+import Loader from '@/components/Loader.vue'
+import ErrorMessage from '@/components/ErrorMessage.vue'
 
 defineProps({
   visible: { type: Boolean, default: false },
   producto: { type: Object, default: null },
   loading: { type: Boolean, default: false },
   error: { type: String, default: null },
+  productoId: { type: [Number, String], default: null },
 })
 
-const emit = defineEmits(['cerrar'])
+const emit = defineEmits(['cerrar', 'reintentar'])
 </script>
 
 <template>
-  <div v-if="visible" class="modal d-block" tabindex="-1" style="background: rgba(0,0,0,0.5)">
+  <div
+    v-if="visible"
+    class="modal d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloDetalleProducto"
+    style="background: rgba(0,0,0,0.5)"
+    @click.self="emit('cerrar')"
+  >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Detalle del producto</h5>
-          <button type="button" class="btn-close" @click="emit('cerrar')"></button>
+          <h5 id="tituloDetalleProducto" class="modal-title">Detalle del producto</h5>
+          <button type="button" class="btn-close" aria-label="Cerrar" @click="emit('cerrar')"></button>
         </div>
         <div class="modal-body">
-          <div v-if="loading" class="text-center py-4">Cargando...</div>
-          <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
+          <Loader v-if="loading" mensaje="Cargando detalle del producto..." />
+          <ErrorMessage v-else-if="error" :mensaje="error" @reintentar="emit('reintentar', productoId)" />
           <div v-else-if="producto">
             <img :src="producto.imagen" :alt="producto.nombre" class="img-fluid rounded mb-3" />
             <h4>{{ producto.nombre }}</h4>
