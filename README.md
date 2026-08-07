@@ -84,47 +84,54 @@ Objeto `Producto`:
 Cada bloque indica **qué archivos ya existen como base/stub** para esa
 tarea y qué falta por completar (buscar comentarios `TODO` con tu nombre).
 
-### 1. Anthony Martínez — Setup + Listado (GET)
+### 1. Anthony Martínez — Setup + Listado (GET) ✅
 - `src/components/ProductoCard.vue`, `src/components/ProductoList.vue`
 - `src/stores/productos.js` (acción `fetchProductos`, ya conectada)
 - `src/components/Loader.vue` (spinner ya listo, ajustar mensaje/posición si hace falta)
 - Layout general del grid en `ProductoList.vue`
 
-### 2. Anthony Ríos — Detalle (GET por id) + errores globales
+### 2. Anthony Ríos — Detalle (GET por id) + errores globales ✅
 - `src/components/ProductoDetalleModal.vue`
 - `src/views/ProductoDetalleView.vue` (alternativa por ruta, opcional)
 - `src/components/ErrorMessage.vue`
 - `src/services/api.js` (interceptor de errores, ya normaliza `{status, message}`)
 - `src/router/index.js` si se necesita más navegación
 
-### 3. César Chamo — Creación (POST)
+### 3. César Chamo — Creación (POST) ✅
 - `src/components/ProductoFormCreate.vue`
 - `src/composables/useProductoForm.js` (validaciones compartidas con Eddy)
 - `src/stores/productos.js` (acción `crear`, ya conectada)
 
-### 4. Eddy Castro — Edición (PUT)
+### 4. Eddy Castro — Edición (PUT) ✅
 - `src/components/ProductoFormEdit.vue`
 - Mismo composable `useProductoForm.js` que César (evita duplicar validaciones)
 - `src/stores/productos.js` (acción `actualizar`, ya conectada)
 
-### 5. Esaú Mendoza — Eliminación (DELETE) + categorías dinámicas (DISTINCT)
-- `src/components/ConfirmDeleteModal.vue`
+### 5. Esaú Mendoza — Eliminación (DELETE) + categorías dinámicas (DISTINCT) ✅
+- `src/components/ConfirmDeleteModal.vue` — modal de confirmación con estado
+  de carga (`loading`) y mensaje de error propio.
 - `src/stores/productos.js` (acción `eliminar`, ya conectada)
-- **Pieza clave:** `src/utils/categorias.js` → función `extraerCategorias()`.
-  Ya tiene una implementación funcional y muy comentada — repásala,
-  entiéndela a fondo y prepárate para explicar el algoritmo en la
-  Diapositiva 2 (usa un `Map` para lograr el efecto `DISTINCT` sobre
-  `categoriaId` + `categoriaNombre`).
-- `src/components/CategoriaMenu.vue` (UI del menú, conectado al getter `categorias` del store)
+- **Pieza clave (implementada):** `src/utils/categorias.js`. El DISTINCT ya
+  no es solo por `categoriaId` — usa una **clave compuesta**
+  `categoriaId::categoriaNombreNormalizado` (`crearClaveCategoria()`) porque
+  el BackService de pruebas tiene el mismo `categoriaId` con nombres
+  inconsistentes entre equipos. Para cada clave se queda con la variante de
+  nombre más frecuente, y si dos categorías distintas terminan con el mismo
+  nombre visible (ej. "Electrónica" en dos `categoriaId` distintos), el menú
+  las distingue mostrando `(ID 1)` / `(ID 3)`. Esta es la lógica que hay que
+  poder explicar en la Diapositiva 2.
+- `src/components/CategoriaMenu.vue` (UI del menú, filtra por `categoria.clave`)
 
-### 6. Maryori Fajardo — Búsqueda y filtros combinados
-- `src/components/SearchBar.vue`, `src/components/FiltroOferta.vue`
-- **Pieza clave:** `src/utils/filtros.js` → función `aplicarFiltros()`
-  (combina nombre + categoría + oferta; ya tiene una versión funcional,
-  ajusta/optimiza según necesidad, por ejemplo debounce en la búsqueda).
-- `src/views/HomeView.vue` (objeto `criterios`, ahí se conectan tus filtros)
+### 6. Maryori Fajardo — Búsqueda y filtros combinados ✅
+- `src/components/SearchBar.vue` — búsqueda reactiva con **debounce de
+  300ms** y botón de limpiar.
+- `src/components/FiltroOferta.vue` — switch "solo en oferta".
+- **Pieza clave (implementada):** `src/utils/filtros.js` → `aplicarFiltros()`
+  combina nombre + categoría (por `categoriaClave`, coordinado con la clave
+  compuesta de Esaú) + oferta al mismo tiempo.
+- `src/views/HomeView.vue` (objeto `criterios: { nombre, categoriaClave, soloOferta }`)
 
-### 7. Glendi Campos — UX/UI, responsive e indicadores de oferta
+### 7. Glendi Campos — UX/UI, responsive e indicadores de oferta ✅
 - `src/components/OfertaBadge.vue` (comparación precio original vs. oferta)
 - `src/style.css` (overrides globales sobre Bootstrap)
 - `src/App.vue` (navbar y shell general)
@@ -143,7 +150,12 @@ tarea y qué falta por completar (buscar comentarios `TODO` con tu nombre).
 
 ## Pendientes generales (no asignados a un rol específico)
 
-- Definir paleta de colores / branding si se quiere personalizar Bootstrap.
-- Mensajes de éxito (toasts) al crear/editar/eliminar — actualmente cada
-  formulario/modal deja un `TODO` para esto.
-- Pruebas manuales de los 5 endpoints antes del Live Demo.
+- Definir paleta de colores / branding si se quiere personalizar Bootstrap
+  (opcional, no bloqueante).
+- Los 7 roles están implementados y probados en vivo contra el BackService
+  real (listado, detalle, crear, editar, eliminar, categorías dinámicas,
+  búsqueda, filtros combinados, responsive, estados de carga/error).
+- El BackService es una base de datos de pruebas **compartida entre
+  equipos**: es normal ver productos/categorías con datos inconsistentes
+  (nombres raros, precios de oferta mayores al original, imágenes rotas).
+  No es un bug del frontend.
